@@ -3,7 +3,7 @@ private:
     vector<int> dsu;
     vector<int> rank;
 
-    __makedsu(int n){
+    void __makedsu(int n){
         dsu.resize(n);
         rank.resize(n);
         for(int i=0; i<n; i++) dsu[i] = i;
