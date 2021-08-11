@@ -16,14 +16,14 @@ void bridgeCutTree(vvi &adj, vvi &tree, DSU &dsu){
     int n = (int) adj.size();
     vi disc(n);
     vi low(n);
-    dsu.create(n);
+    dsu.make(n);
     tree.resize(n);
     
     tarjans_b(0, adj, disc, low, -1, dsu);
     for(int i=0; i<n; i++){
         for(auto j:adj[i]){
-            int ip = dsu.parent(i);
-            int jp = dsu.parent(j);
+            int ip = dsu[i];
+            int jp = dsu[j];
             if(ip==jp) continue;
             tree[ip].pb(jp);
         }

@@ -12,12 +12,17 @@ private:
 public:
     DSU(){}
     DSU(int n){ __makedsu(n); }
-    void create(int n){ __makedsu(n); }
+    void make(int n){ __makedsu(n); }
     
     int parent(int i){
         if(dsu[i]==i) return i;
         else return dsu[i] = parent(dsu[i]);
     }
+
+    DSU operator[](int i){
+        return parent(i);
+    }
+
     void unify(int a, int b){
         a = parent(a);
         b = parent(b);
