@@ -19,7 +19,7 @@ public:
         else return dsu[i] = parent(dsu[i]);
     }
 
-    DSU operator[](int i){
+    int operator[](int i){
         return parent(i);
     }
 

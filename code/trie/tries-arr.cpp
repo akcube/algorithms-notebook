@@ -8,6 +8,7 @@ public:
     Trie(){
         root = 0;
         lastocc = 0;
+        memset(arr, 0, sizeof(int)*1e6*26);
     }
 
     void insert(const string &x){
