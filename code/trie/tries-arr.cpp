@@ -1,12 +1,12 @@
 const int NX = int(1e6) + int(5e5);
-int arr[NX];
+int arr[NX][26];
 int root;
 int lastocc;
 
 void Trie(){
     root = 0;
     lastocc = 0;
-    memset(arr, 0, sizeof(int)*1e6*26);
+    memset(arr, 0, sizeof(int)*NX*26);
 }
 
 void insert(const string &x){
