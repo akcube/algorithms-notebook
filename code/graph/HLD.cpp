@@ -1,37 +1,38 @@
 /**
  * TODO
  * 1. Stress-test 
- * 2. Switch to bottom-up Segtree
 */
 
 struct HLD{
     const int identity = 0;
     int merge(int a, int b) { return a+b; }
 
-    int n, root, timer = 0, tsz;
+    int n, root, timer = 0, t;
     vi size, heavy, top, st, en, tree, dep, par;
 
-    void st_update(int node, int val){
-        tree[tsz+node] = val;
-        for(int i=(tsz+node)/2; i >= 1; i /= 2)
-            tree[i] = merge(tree[2*i], tree[2*i + 1]);
+    void st_update(int v, int val){
+        for(tree[v+=t] = val; v > 1; v >>= 1)
+            tree[v>>1] = merge(tree[v], tree[v^1]);
     }
 
-    int st_query(int node, int seg_l, int seg_r, int q_l, int q_r){
-        if(seg_l >= q_l && seg_r <= q_r) return tree[node];
-        if(seg_l > q_r || seg_r < q_l) return identity;
-        int mid = seg_l + (seg_r-seg_l)/2;
-        return merge(st_query(2*node, seg_l, mid, q_l, q_r), st_query(2*node+1, mid+1, seg_r, q_l, q_r));
+    int st_query(int l, int r){
+        int res = identity;
+        for(l += t, r += t; l <= r; l>>=1, r>>=1){
+            if(l == r) return merge(res, tree[l]);
+            if(l&1) res = merge(res, tree[l++]);
+            if(!(r&1)) res = merge(res, tree[r--]);
+        }
+        return res;
     }
 
     int query(int a, int b){
         int ans = identity;
         for(; top[a] != top[b]; b = par[top[b]]){
             if(dep[top[a]] > dep[top[b]]) swap(a, b);
-            ans = merge(ans, st_query(1, 0, tsz-1, st[top[b]], st[b]));
+            ans = merge(ans, st_query(st[top[b]], st[b]));
         }
         if(dep[a] > dep[b]) swap(a, b);
-        ans = merge(ans, st_query(1, 0, tsz-1, st[a], st[b]));
+        ans = merge(ans, st_query(st[a], st[b]));
         return ans;
     }
 
@@ -41,13 +42,10 @@ struct HLD{
     }
 
     void build(){
-        int t = sz(tree);
-        tsz = 1 << (32 - __builtin_clz (t - 1));
-        tree.resize(2*tsz);
-        for(int i=0; i<t; i++) tree[tsz+i] = tree[i];
-        for(int i=t; i<tsz; i++) tree[tsz+i] = identity;
-
-        for(int i=tsz-1; i >= 1; i--) 
+        t = sz(tree);
+        tree.resize(2*t);
+        for(int i=0; i<t; i++) tree[t+i] = tree[i];
+        for(int i=t-1; i >= 1; i--) 
             tree[i] = merge(tree[2*i], tree[2*i+1]);
     }
     
