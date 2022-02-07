@@ -1,13 +1,8 @@
-#include<bits/stdc++.h>
-
-using namespace std;
-
-typedef vector<int> vi;
-typedef vector<pair<int, int>> vii;
-#define ff first
-#define ss second
-#define all(s) s.begin(), s.end()
-#define sz(x) (int)(x).size()
+/**
+ * DO NOT USE
+ * Use https://github.com/kth-competitive-programming/kactl/blob/main/content/strings/SuffixArray.h 
+ * until this is updated
+**/
 
 class SuffixArray{
 private:

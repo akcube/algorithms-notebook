@@ -47,7 +47,7 @@ public:
         int se = ((h[r+1].ss - h[l].ss + m2) * 1ll * ipow_p[l].ss)%m2;
         return {fi, se}; 
     }
-    bool comp(hstring &t, int l, int r) { return t.hash() == hash(l, r); }
+
     size_t size() { return sz(s); }
     string& str() { return s; }
 
@@ -55,13 +55,6 @@ public:
     friend istream &operator>>(istream &in, hstring &hs) {
         in>>hs.s; hs._hash();
         return in;
-    }
-
-    int index(hstring &t){
-        int ans = -1;
-        for(int i=0; i+sz(t)-1 < sz(s); i++)
-            if(t.hash() == hash(i, i+sz(t)-1)) { ans = i; break; }
-        return ans;
     }
 };
 
