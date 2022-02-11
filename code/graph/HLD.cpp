@@ -1,6 +1,9 @@
 /**
  * TODO
  * 1. Stress-test 
+ * NOTE
+ * 1. When handling edge weights, REMEMBER to exclude LCA.
+ *      - in query(a, b), change the last st query to st[a]+1, st[b]
 */
 
 struct HLD{
