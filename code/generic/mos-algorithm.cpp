@@ -1,5 +1,5 @@
 // Global
-int BLOCK = 1; // DONT FORGET TO CHANGE
+int BLOCK = DO_NOT_FORGET_TO_CHANGE_THIS;
 struct Query{
     int l, r, id;
     Query(int _l, int _r, int _id) : l(_l), r(_r), id(_id) {}
