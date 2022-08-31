@@ -8,7 +8,6 @@ struct Query{
         return  (mblock < oblock) or 
                 (mblock == oblock and mblock % 2 == 0 and r < o.r) or
                 (mblock == oblock and mblock % 2 == 1 and r > o.r);
-
     };
 };
 
