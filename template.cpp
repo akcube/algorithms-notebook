@@ -21,12 +21,12 @@ typedef vector<vii> vvii;
 #define ff first
 #define ss second
 #define pb push_back
+#define endl '\n'
 #define all(s) s.begin(), s.end()
 #define rep(i, a, b) for(int i = a; i < (b); ++i)
 #define sz(x) (int)(x).size()
 #define tc int t; cin>>t; while(t--)
 #define fightFight cin.tie(0) -> sync_with_stdio(0)
-#define endl '\n'
 
 void solve(){
 
