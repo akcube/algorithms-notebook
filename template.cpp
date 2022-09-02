@@ -10,7 +10,7 @@ using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statisti
 #define MOD 1000000007
 using ll = long long;
 using dbl = long double;
-//#define int ll /* Comment out if overflow sus & change int main to signed main */
+//#define int ll
 
 typedef pair<int, int> pii;
 typedef vector<int> vi;
@@ -25,8 +25,6 @@ typedef vector<vii> vvii;
 #define rep(i, a, b) for(int i = a; i < (b); ++i)
 #define sz(x) (int)(x).size()
 #define tc int t; cin>>t; while(t--)
-#define file_read(x,y) freopen(x, "r", stdin); \
-                    freopen(y, "w", stdout);
 #define fightFight cin.tie(0) -> sync_with_stdio(0)
 #define endl '\n'
 
