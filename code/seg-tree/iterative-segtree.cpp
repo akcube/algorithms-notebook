@@ -1,17 +1,12 @@
 template <typename T, typename F>
 struct Segtree{
-    int n;
-    vector<T> tree;
-    T identity;
-    F merge;
-
-    Segtree(vector<T> &arr, T id, F _m) : n(sz(arr)), identity(id), merge(_m) {
-        tree.resize(2*n);
+    int n; vector<T> tree;
+    T identity; F merge;
+    Segtree(vector<T> &arr, T id, F _m) : n(sz(arr)), identity(id), merge(_m), tree(2*n){
         for(int i=0; i<n; i++) tree[n+i] = arr[i];
         for(int i=n-1; i>=1; i--) 
             tree[i] = merge(tree[2*i], tree[2*i+1]);
     }
-
     T query(int l, int r){
         T res = identity;
         for(l += n, r += n; l <= r; l>>=1, r>>=1){
@@ -21,7 +16,6 @@ struct Segtree{
         }
         return res;
     }
-
     void update(int v, T value){
         for(tree[v+=n] = value; v > 1; v >>= 1)
             tree[v>>1] = merge(tree[v], tree[v^1]);
