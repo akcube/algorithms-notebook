@@ -1,51 +1,24 @@
-template <typename T>
-class RangeUpdateTree{
-private: 
-    int n;
-    vector<T> tree;
-    T identity;
-
-    T merge(T a, T b){
-        return a + b;
+template <typename T, typename F>
+struct RangeUpdateTree{
+    int n; vector<T> tree;
+    T identity; F merge;
+    RangeUpdateTree(vector<T> &arr, T id, F _m) : n(sz(arr)), identity(id), merge(_m), tree(2*n){
+        for(int i=0; i<n; i++) tree[n+i] = arr[i];
     }
-
-    T __query(int q){
-        T accum = identity;
-        for(int i=n+q; i > 0; i /= 2){
-            accum = merge(tree[i], accum);
-        }
-        return accum;
-    }
-
-    void __update(int node, int seg_l, int seg_r, int q_l, int q_r, T val){
-        if(seg_l > q_r || seg_r < q_l) return;
-        if(seg_l >= q_l && seg_r <= q_r) {
-            tree[node] += val;
-            return;
-        }
-        int mid = seg_l + (seg_r-seg_l)/2;
-        __update(2*node, seg_l, mid, q_l, q_r, val);
-        __update(2*node+1, mid+1, seg_r, q_l, q_r, val);
-    }
-
-    void build(vector<T> &arr){
-        n = 1 << (32 - __builtin_clz ((int)arr.size() - 1));
-        tree.resize(2*n);
-        for(int i=0; i<arr.size(); i++)
-            tree[n+i] = arr[i];
-    }
-
-public:
-    RangeUpdateTree(vector<T> &arr, T id){
-        identity = id;
-        build(arr);
-    }
-
-    T query(int pos){
-        return __query(pos);
-    }
-
     void update(int l, int r, T value){
-        __update(1, 0, n-1, l, r, value);
+        for(l += n, r += n; l <= r; l>>=1, r>>=1){
+            if(l==r) { tree[l] = merge(value, tree[l]); break; }
+            if(l&1) tree[l] = merge(value, tree[l]), l++;
+            if(!(r&1)) tree[r] = merge(value, tree[r]), r--;
+        }
+    }
+    T query(int v){
+        T res = tree[v+=n];
+        for(; v > 1; v >>= 1) res = merge(res, tree[v>>1]);
+        return res;
     }
 };
+
+// Usage
+auto merge = [&](int a, int b) { return min(a, b); };
+RangeUpdateTree<int, decltype(merge)> st(arr, INT_MAX, merge);
