@@ -1,91 +1,51 @@
 /**
- * TODO
- * 1. Stress-test 
- * NOTE
- * 1. When handling edge weights, REMEMBER to exclude LCA.
- *      - in query(a, b), change the last st query to st[a]+1, st[b]
+ * Note: Recheck the indexing for VAL_ON_EDGES = true. Haven't verified beyond testing on a CF problem.
+ * NOT STRESS-TESTED
 */
 
+template <typename T, typename F, bool VAL_ON_EDGES>
 struct HLD{
-    const int identity = 0;
-    int merge(int a, int b) { return a+b; }
-
-    int n, root, timer = 0, t;
-    vi size, heavy, top, st, en, tree, dep, par;
-
-    void st_update(int v, int val){
-        for(tree[v+=t] = val; v > 1; v >>= 1)
-            tree[v>>1] = merge(tree[v], tree[v^1]);
+    int n, timer = 0;
+    vi size, top, tin, dep, par;
+    Segtree<T, F> st;
+    HLD(vvi &adj, const vector<T> &arr, T id, F _m) : n(sz(adj)), size(n, 1), top(n), tin(n), dep(n), par(n, -1){
+        function<void(int)> dfs_hvy = [&](int v){
+            if(adj[v][0] == par[v]) swap(adj[v].front(), adj[v].back());
+            for(auto &to : adj[v]) if(to != par[v]) {
+                par[to] = v, dep[to] = dep[v] + 1;
+                dfs_hvy(to);
+                size[v] += size[to];
+                if(size[to] > size[adj[v][0]]) swap(to, adj[v][0]);
+            }
+        }; dfs_hvy(0);
+        vector<T> temp; temp.reserve(n);
+        function<void(int)> dfs_hld = [&](int v){
+            tin[v] = timer++; temp.pb(arr[v]);
+            for(auto &to : adj[v]) if(to != par[v]) {
+                top[to] = (to == adj[v][0] ? top[v] : to);
+                dfs_hld(to);
+            }
+        }; dfs_hld(0);
+        st = Segtree<T, decltype(_m)>(temp, id, _m);
     }
-
-    int st_query(int l, int r){
-        int res = identity;
-        for(l += t, r += t; l <= r; l>>=1, r>>=1){
-            if(l == r) return merge(res, tree[l]);
-            if(l&1) res = merge(res, tree[l++]);
-            if(!(r&1)) res = merge(res, tree[r--]);
+    template <class B> int process(int u, int v, B op) {
+        for (; top[u] != top[v]; v = par[top[v]]) {
+            if(dep[top[u]] > dep[top[v]]) swap(u, v);
+            op(tin[top[v]], tin[v]);
         }
-        return res;
+        if (dep[u] > dep[v]) swap(u, v);
+        if(!VAL_ON_EDGES or u!=v) op(tin[u] + VAL_ON_EDGES, tin[v]);
+        return u;
     }
-
-    int query(int a, int b){
-        int ans = identity;
-        for(; top[a] != top[b]; b = par[top[b]]){
-            if(dep[top[a]] > dep[top[b]]) swap(a, b);
-            ans = merge(ans, st_query(st[top[b]], st[b]));
-        }
-        if(dep[a] > dep[b]) swap(a, b);
-        ans = merge(ans, st_query(st[a], st[b]));
+    int lca(int u, int v) { return process(u, v, [&](int,int){}); }
+    T query(int u, int v){
+        T ans = st.identity;
+        process(u, v, [&](int l, int r){
+            ans = st.merge(ans, st.query(l, r));
+        });
         return ans;
     }
-
-    void update(int node, int val){
-        st_update(st[node], val);
-        st_update(en[node], -val);
-    }
-
-    void build(){
-        t = sz(tree);
-        tree.resize(2*t);
-        for(int i=0; i<t; i++) tree[t+i] = tree[i];
-        for(int i=t-1; i >= 1; i--) 
-            tree[i] = merge(tree[2*i], tree[2*i+1]);
-    }
-    
-    void dfs_hvy(int v, vvi &adj, int p){
-        top[v] = v;
-        for(auto &to:adj[v]){
-            if(to == p) continue;
-            dep[to] = dep[v] + 1;
-            par[to] = v;
-            dfs_hvy(to, adj, v);
-            size[v] += size[to];
-            if(heavy[v] == -1 or size[to] > size[heavy[v]]) heavy[v] = to;
-        }
-    }
-
-    void dfs_hld(int v, vvi &adj, int p, vi &arr){
-        st[v] = timer++; tree.pb(arr[v]);
-        
-        if(heavy[v] != -1){
-            top[heavy[v]] = top[v];
-            dfs_hld(heavy[v], adj, v, arr);
-        }
-
-        for(auto &to:adj[v]){
-            if(to == p or to == heavy[v]) continue;
-            dfs_hld(to, adj, v, arr);
-        }
-
-        en[v] = timer++; tree.pb(-arr[v]);
-    }
-
-    HLD(vvi &adj, int r, vi &arr) : n(sz(adj)), heavy(n, -1), top(n), st(n), en(n), dep(n), par(n) {
-        size.assign(n, 1);
-        tree.reserve(2*n);
-        root = r;
-        dfs_hvy(root, adj, -1);
-        dfs_hld(root, adj, -1, arr);
-        build();
+    void update(int v, T val){
+        st.update(tin[v], val);
     }
 };
