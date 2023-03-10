@@ -1,62 +1,37 @@
-// Note: Might have overflow bugs, need to stress test. Use with #define int ll just in case.
-// Note2: Useful but also memory heavy as it maintains rabinkarp array for all strings.
+template<typename... Ts, size_t... Is, typename F>
+void __op(index_sequence<Is...>, tuple<Ts...>& a, const tuple<Ts...>& b, F op) { ((get<Is>(a) = op(get<Is>(a), get<Is>(b))), ...); }
+#define OVERLOAD(OP, F) \
+template<typename... Ts> auto& operator OP##=(tuple<Ts...> &a, const tuple<Ts...> &b) { __op(index_sequence_for<Ts...>(), a, b, F<>{}); return a; } \
+template<typename... Ts> auto operator OP(const tuple<Ts...> &a, const tuple<Ts...> &b) { auto c = a; c OP##= b; return c; }
+OVERLOAD(+, plus) OVERLOAD(-, minus) OVERLOAD(*, multiplies) OVERLOAD(/, divides)
 
-class hstring{
-private:
-    int n;
-    string s;
-    vector<pii> h;
-    const static int p1 = 137;
-    const static int p2 = 277;
-    const static int m1 = 127657753;
-    const static int m2 = 987654319;
-    static vector<pii> pow_p; 
-    static vector<pii> ipow_p;
+const int MAXN = 2e5+10; // *
+constexpr int NUM_HASHES = 2; // *
+constexpr array<int, NUM_HASHES> mods = {127657753, 987654319}; // *
+template <size_t N = NUM_HASHES>
+constexpr auto mint_ntuple(const int &v) {
+    return [&]<size_t... Is>(index_sequence<Is...>) { return make_tuple(mint<mods[Is]>(v)...); }(make_index_sequence<N>{}); }
 
-    void prec(){
-        pow_p[0] = ipow_p[0] = {1, 1};
-        int ip1 = 11181701;
-        int ip2 = 802246288;
-        for(int i=1; i<sz(pow_p); i++) {
-            pow_p[i].ff = (1ll*pow_p[i-1].ff*p1)%m1;
-            ipow_p[i].ff = (1ll*ipow_p[i-1].ff*ip1)%m1;
-            pow_p[i].ss = (1ll*pow_p[i-1].ss*p2)%m2;
-            ipow_p[i].ss = (1ll*ipow_p[i-1].ss*ip2)%m2;
-        }
+using HT = decltype(mint_ntuple(0));
+HT p1 = {137, 277}; // *
+
+HT pp[MAXN], ipp[MAXN];
+void prec(){
+    pp[0] = ipp[0] = mint_ntuple(1);
+    HT ip1 = pp[0] / p1;
+    for(int i=1; i < MAXN; i++){
+        pp[i] = pp[i-1] * p1;
+        ipp[i] = ipp[i-1] * ip1;
     }
+}
 
-    void _hash(){
-        if(pow_p[0].ff == 0) prec();
-        
-        n = sz(s);
-        h.resize(n+1);
-        for(int i=0; i<sz(s); i++){
-            h[i+1].ff = (h[i].ff + (1ll*s[i]*pow_p[i].ff)%m1)%m1;
-            h[i+1].ss = (h[i].ss + (1ll*s[i]*pow_p[i].ss)%m2)%m2;
-        }
-    }
-
-public:
+template<typename T>
+struct hstring{
+    vector<HT> h;
     hstring() = default;
-    hstring(string &t) : s(t){ _hash(); }
-    hstring(string t) : s(t){ _hash(); }
-
-    pii hash() { return h[n]; }
-    pii hash(int l, int r) { 
-        int fi = ((h[r+1].ff - h[l].ff + m1) * 1ll * ipow_p[l].ff)%m1;
-        int se = ((h[r+1].ss - h[l].ss + m2) * 1ll * ipow_p[l].ss)%m2;
-        return {fi, se}; 
+    hstring(T &v) : h(sz(v)+1) {
+        for(int i=0; i < sz(v); i++) h[i+1] = h[i] * p1 + mint_ntuple(v[i]);
     }
-
-    size_t size() { return sz(s); }
-    string& str() { return s; }
-
-    bool operator ==(hstring &t) { return t.hash() == hash(); }
-    friend istream &operator>>(istream &in, hstring &hs) {
-        in>>hs.s; hs._hash();
-        return in;
-    }
+    HT hash(int l, int r){ return h[r+1] - h[l] * p[r-l+1]; }
+    HT hash() { return h.back(); }
 };
-
-vector<pii> hstring::pow_p(1e7);
-vector<pii> hstring::ipow_p(1e7);
